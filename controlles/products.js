@@ -1,8 +1,8 @@
-import Product from "../models/Products.js";
+import {ProductModel}  from "../models/Products.js";
 
 export const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().limit(req.query.limit).sort({createdAt: "desc"});
+        const products = await ProductModel.find().limit(req.query.limit).sort({createdAt: "desc"});
         res.status(200).json(products)
     }
     catch (err) {
@@ -11,7 +11,7 @@ export const getAllProducts = async (req, res) => {
 }
 export const getProductsByDate = async (req, res) => {
     try {
-        const products = await Product.find( { createdAt: { $gte: req.query.from, $lte: req.query.to } }).limit(req.query.limit).sort({createdAt: "desc"});
+        const products = await ProductModel.find( { createdAt: { $gte: req.query.from, $lte: req.query.to } }).limit(req.query.limit).sort({createdAt: "desc"});
         res.status(200).json(products)
     }
     catch (err) {
@@ -20,7 +20,7 @@ export const getProductsByDate = async (req, res) => {
 }
 export const getProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await ProductModel.findById(req.params.id);
         res.status(200).json(product)
     }
     catch (err) {
@@ -29,7 +29,7 @@ export const getProduct = async (req, res) => {
 }
 export const addProduct = async (req, res) => {
     try {
-        const newProduct = new Product(req.body)
+        const newProduct = new ProductModel(req.body)
         await newProduct.save()
         res.status(200).send("Stworzono produkt")
     }
@@ -39,7 +39,7 @@ export const addProduct = async (req, res) => {
 }
 export const delProduct = async (req, res) => {
     try {
-        await Product.findByIdAndRemove(req.params.id)
+        await ProductModel.findByIdAndRemove(req.params.id)
         res.status(200).send("Usunięto produkt")
     }
     catch (err) {
