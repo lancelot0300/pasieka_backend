@@ -22,13 +22,16 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.body.username })
+        let user = await User.findOne({ username: req.body.username })
         if (!user) return res.status(404).send("Nie ma takiego użytkownika")
 
         const isPassCorrect = await bcrypt.compare(req.body.password, user.password)
         if (!isPassCorrect) return res.status(400).send("Hasło lub login nieprawidłowy")
 
-        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT)
+        user = await putToken(user._id)
+
+
+        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin, token: user.token }, process.env.JWT)
 
         const { password, isAdmin, ...others } = user._doc
         return res.cookie("access_token", token, {
@@ -39,5 +42,31 @@ export const login = async (req, res) => {
     }
     catch (err) {
         res.status(500).send(err.message)
+    }
+}
+
+const putToken = async (userId) => {
+    try {
+        const token = (Math.random() + 1).toString(36).substring(7);
+        return await User.findByIdAndUpdate(userId, { token: token }, {
+            new: true
+        })
+    }
+    catch (err) {
+        res.status(500).send(err.message)
+    }
+}
+
+export const logout = async (req, res) => {
+    try {
+        console.log(req.user)
+        await User.findByIdAndUpdate(req.user.id, { token: "" })
+        return res.cookie("access_token", "", {
+            httpOnly: true,
+            maxAge:1
+        }).status(200).send("Wylogowano")
+    }
+    catch (err) {
+        return res.status(500).send(err.message)
     }
 }

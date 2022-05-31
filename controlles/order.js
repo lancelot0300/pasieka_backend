@@ -36,16 +36,16 @@ export const addOrder = async (req, res) => {
         await verifyToken(req, res, () => {
             user = req.user
         })
-        if (!req.body.cart || req.body.cart.length === 0) return res.status(500).send("brak koszyka")
+        if(!user) return
         const newOrder = new Order({
             userId: user.id,
-            cart: req.body.cart
+            cart: req.body
         })
-        await newOrder.save()
-        res.status(200).send("Stworzono zamówienie")
+       const rest = await newOrder.save()
+        res.status(200).send(rest)
     }
     catch (err) {
-        res.status(500).send(err.message)
+      return res.status(500).send("Nie udało się dodać zamówienia, błąd: "+ err)
     }
 }
 export const delOrder = async (req, res) => {
